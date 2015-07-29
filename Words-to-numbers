@@ -1,0 +1,30 @@
+#Input the file(s)
+print("How many files?")
+n <- scan(what = integer(), nmax = 1)
+a <- NULL
+x <- NULL
+for(i in 1:n){
+  a <- scan(file.choose(), what = character())
+  x <- append(x, a)
+}
+x <- toupper(unlist(strsplit(x, "[[:space:]]")))
+x <- gsub("^\\W+|\\W+$", "", x)
+y <- unlist(strsplit(x, "/"))
+m <- grep('^$', y)
+if (length(m)>0){
+  y <- y[-m]
+}
+
+#Define number of total words and numbers
+numbers <- length(grep("[0-9]", y))
+words <- length(y) - numbers
+
+#The ratio
+print(paste("Total words: ", words))
+print(paste("Total numbers: ", numbers))
+if(numbers>0){
+  ratio <- words/numbers
+  print(paste("Words to numbers: ", ratio))
+} else {
+  print("Undefined -- 0 numbers")
+}
