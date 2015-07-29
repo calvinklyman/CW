@@ -1,0 +1,41 @@
+#Prompt for number of files to be read
+print("How many files?")
+n <- scan(what = integer(), nmax = 1)
+
+#Scan and format those files
+a <- NULL
+x <- NULL
+for(i in 1:n){
+  a <- scan(file.choose(), what = character())
+  x <- append(x, a)
+}
+x <- toupper(unlist(strsplit(x, "[[:space:]]")))
+x <- gsub("^\\W+|\\W+$", "", x)
+y <- unlist(strsplit(x, "/"))
+m <- grep('^$', y)
+if (length(m)>0){
+  y <- y[-m]
+}
+
+#Turn the text into vectors of occurring bigrams and their number of of occurences
+ytwo <- NULL
+for(i in 1:(length(y)-1)){
+  ytwo[i] <- paste(y[i], y[i+1])
+}
+z <- factor(ytwo)
+occurrences <- summary(z, maxsum = 10000000000)
+names(occurrences) <- c()
+word <- levels(z)
+
+#Create a dataframe with "word" as column 1 and "occurrences" as column 2
+word_df <- data.frame(word, occurrences, stringsAsFactors = FALSE)
+word_df_ordered <- word_df[order(occurrences, decreasing = TRUE),]
+hundred_word_df <- word_df_ordered 
+if (length(occurrences) > 100){
+  hundred_word_df <- word_df_ordered[1:100,]
+}
+
+#Output the top 100 and write them to a CSV
+print(hundred_word_df, row.names = FALSE)
+names(hundred_word_df) <- NULL
+write.csv(hundred_word_df, paste("legalbigrams", as.character(Sys.time()), ".csv"), row.names = FALSE)
