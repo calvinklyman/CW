@@ -1,0 +1,34 @@
+#"Elk" is a dataframe which contains a list of files and their types 
+elk <- read.csv("~/Downloads/classify-temp.csv", header = FALSE, stringsAsFactors = FALSE)
+
+#"Filename", "ratiovec", and "filetype" will be the columns in the final output
+filename <- NULL
+ratiovec <- NULL
+filetype <- NULL
+
+#I'm using a for loop to do this sequence of commands for every file listed in "elk"
+for(i in 1:nrow(elk)){
+  x <- scan(paste("~/Downloads/small-data/", elk[i, 1], sep = ""), what = character()) #reads the "i"th filename (as a file) into vector "x"
+  x <- toupper(unlist(strsplit(x, "[[:space:]]"))) #This a) removes any remaining spaces in the vector and b) converts all words to uppercase
+  x <- gsub("^\\W+|\\W+$", "", x) #This gets rid of all non-alphanumeric characters at the start and end of each element of x (like five asterisks in a row or something)
+  y <- unlist(strsplit(x, "/")) #For some reason, "/"s are considered alphanumeric, so I'm getting rid of them here. 
+  
+  #The above commands sometimes leave empty strings as elements of "y". The purpose of the following few commands is to find those elements and remove them. Y will thus contain each word from the "i"th file as an element
+  m <- grep('^$', y) 
+  if (length(m)>0){
+    y <- y[-m]
+  }
+  
+  #Define number of total words and numbers, and the ratio between the two
+  numbers <- length(grep("[0-9]", y))
+  words <- length(y) - numbers
+  ratio <- words/numbers
+  
+  #Create the "i"th record in the final table
+  filename <- append(filename, elk[i,1])
+  ratiovec <- append(ratiovec, ratio)
+  filetype <- append(filetype, elk[i,2])
+}
+#"Elktwo" is the final dataframe. Line 33 creates elktwo, and Line 34 writes elktwo to a .csv
+elktwo <- data.frame(cbind(filename, ratiovec, filetype), stringsAsFactors = FALSE)
+write.csv(elktwo, paste("wordstonumbers", as.character(Sys.time()), ".csv", sep = ""), row.names = FALSE)
